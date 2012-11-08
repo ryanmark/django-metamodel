@@ -15,7 +15,6 @@ class UserMetaInline(admin.TabularInline):
 class UserAdmin(BuiltinUserAdmin):
     inlines = [
         UserMetaInline,
-        MagplusSessionInline,
     ]
 
 admin.site.register(User, UserAdmin)
