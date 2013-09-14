@@ -1,18 +1,30 @@
 from django.db import models
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from UserDict import DictMixin
 
 
-class MetaManager(models.Manager):
+class MetaManager(models.Manager, DictMixin):
     """
     A related model manager for meta models. Allows you to treat
     the `user.meta` attribute like a dictionary.
     """
     use_for_related_fields = True
+    cache_prefix = 'foo'
+
+    def __init__(self, *args, **kwargs):
+        #self.cache_prefix = self.model._meta.db_table
+
+        return super(MetaManager, self).__init__(*args, **kwargs)
 
     def __getitem__(self, key):
+        ret = cache.get(self._makekey(key))
+        if ret:
+            return ret
         try:
             item = self.get(key=key)
+            cache.set(self._makekey(key), item.value)
             return item.value
         except ObjectDoesNotExist:
             return None
@@ -23,20 +35,32 @@ class MetaManager(models.Manager):
         if not created and item.value != value:
             item.value = value
             item.save()
+        cache.set(self._makekey(key), value)
 
     def __delitem__(self, key):
         try:
             item = self.get(key=key)
             item.delete()
+            cache.delete(self._makekey(key))
         except ObjectDoesNotExist:
             pass
 
-    def __contains__(self, item):
-        try:
-            item = self.get(key=item)
+    def __contains__(self, key):
+        items = self.filter(key=key).count()
+        if items > 0:
             return True
-        except ObjectDoesNotExist:
-            return False
+        return False
+
+    def __iter__(self):
+        items = self.all()
+        for i in items:
+            yield (i.key, i.value)
+
+    def keys(self):
+        return self.all().values_list('key', flat=True)
+
+    def _makekey(self, *args):
+        return '_'.join([self.cache_prefix, self.instance.pk] + args)
 
 
 class ModelMeta(models.Model):
