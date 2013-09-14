@@ -1,7 +1,8 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
-    name="django-meta",
+    name="django-metamodel",
+    packages=find_packages(),
     version="1.0",
     author="Ryan Mark",
     author_email="ryan@mrk.cc",
