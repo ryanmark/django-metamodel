@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="meta",
+    name="django-meta",
     version="1.0",
     author="Ryan Mark",
     author_email="ryan@mrk.cc",
