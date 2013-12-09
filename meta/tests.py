@@ -1,15 +1,7 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-import unittest
-
 from django.test import TestCase
-from django.test.client import Client
+from django.db import IntegrityError
 
-from .models import UserMeta, User
+from .models import User
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -36,10 +28,8 @@ class TestUserMeta(TestCase):
 
         try:
             user.meta.create(key="favorite_animal", value="penguin")
-        except Exception, e:
-            self.assertEqual(
-                e.message,
-                "columns user_id, key are not unique")
+        except IntegrityError:
+            pass
 
     def test_meta_shortcuts(self):
         user = User.objects.create(username="bobby", email="bobby@dot.com")
