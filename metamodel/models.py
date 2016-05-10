@@ -72,3 +72,4 @@ class UserMeta(ModelMeta):
     class Meta:
         unique_together = ('user', 'key')
         verbose_name_plural = "user metadata"
+        app_label = 'metamodel'
